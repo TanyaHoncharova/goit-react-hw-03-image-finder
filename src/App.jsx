@@ -1,64 +1,128 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+// import { ToastContainer } from 'react-toastify';
+import ImagesApi from './services/ImagesApi';
+
 import Modal from './components/Modal';
-import Searchbar from './components/Searchbar'
+import Button from './components/Button';
+import Searchbar from './components/Searchbar';
+import ImageGallery from './components/ImageGallery';
+import ImageGalleryItem from './components/ImageGalleryItem';
+import Loader from './components/Loader'
 import './App.css';
 
 
-// const KEY = '21857755-e4f1c8434e57799dc3fa1e51f';
-// const BASE_URL = 'https://pixabay.com/api';
+
 
 class App extends Component {
   state = {
-    hits: null,
-    loading: false,
+    images: [],
+    currentPage: 1,
+    currentPageImages: [],
+    searchQuery: '',
+    isLoading: false,
+    error: null,
+    largeImage: '',
     showModal: false,
-    searchQuery: 'cat',
+    modalUrl: '',
+    modalAlt: '',
   }
 
-  componentDidMount() {
-    this.setState({ loading: true });
+//   componentDidMount() {
+//     this.setState({ loading: true });
     
-    fetch('https://pixabay.com/api/?key=21857755-e4f1c8434e57799dc3fa1e51f&q=cat&image_type=photo&orientation=horizontal&page=1&per_page=12')
-      .then(response => response.json())
-      .then(({ hits }) => hits)
-      .then(hits => this.setState({ hits }))
-      .finally(() => this.setState({ loading: false }));
-}
+//     fetch('https://pixabay.com/api/?key=21857755-e4f1c8434e57799dc3fa1e51f&q=cat&image_type=photo&orientation=horizontal&page=1&per_page=12')
+//       .then(response => {
+//         if() {
+//          return response.json()
+//         }
+//       })
+//       .then(({ hits }) => hits)
+//       .then(hits => this.setState({ hits }))
+//       .finally(() => this.setState({ loading: false }));
+// }
 
-
-
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      this.fetchImages();
+  }
+  }
+  
   toggleModal = () => {
     this.setState(({showModal}) => ({
       showModal: !showModal
     }))
   }
 
-  onFormSubmit = ({ searchQuery }) => {
-    this.setState({searchQuery});
+  handleFormSubmit = (searchQuery) => {
+    this.setState({
+      searchQuery: searchQuery,
+      currentPage: 1, 
+      images: [], 
+      error: null, 
+    });
+  };
+
+  fetchImages = () => {
+    const { searchQuery, currentPage } = this.state;
+    const options = { searchQuery, currentPage };
+
+    this.setState({ loading: true });
+
+    ImagesApi.fetchImages(options)
+      .then(images => {
+        this.setState(prevState => ({
+          images: [...prevState.images, ...images],
+          currentPage: prevState.currentPage + 1,
+          currentPageImages: [...images],
+        }));
+        if (images.length === 0) {
+          this.setState({
+            error: 'Nothing was find by your query. Try again.',
+          });
+        }
+      })
+      .catch(error => this.setState({ error: error.message }))
+      .finally(() => this.setState({ isLoading: false }));
+  };
+
+  onClickImageGalleryItem = (e) => {
+    this.setState({
+      modalUrl: e.currentTarget.getAttribute('url'),
+      modalAlt: e.currentTarget.getAttribute('alt'),
+    });
+    this.toggleModal();
   };
 
   render() {
-    const { showModal, searchQuery } = this.state;
+    const { images, searchQuery, currentPageImages, isLoading, error, showModal, modalAlt, modalUrl } = this.state;
+    const shouldRenderLoadMoreButton = !(currentPageImages.length < 12) && !isLoading;
     return (
-      <div>
-        <Searchbar onSubmit={this.onFormSubmit}/>
-        <button type="button" onClick={this.toggleModal}>Open Modal</button>
-        {this.state.loading && <h1>Loading</h1>}
-        {this.state.hits && (
-          <div> тут будут картинки после фетч и когда запишем их в стате </div>
+      <>
+        <Searchbar onSubmit={this.handleFormSubmit} />
+        {error && (
+          <p> something went wrong ... {error } </p>
         )}
+        <ImageGallery>
+          {images.map(({ id, tags, webformatURL, largeImageURL }) => (
+            <ImageGalleryItem key={id} alt={tags} src={webformatURL} url={largeImageURL} onClick={this.onClickImageGalleryItem} />
+          ))}
+        </ImageGallery>
+        {isLoading && <Loader name={searchQuery}/>}
+        
+         { shouldRenderLoadMoreButton && 
+          <Button onFetchImages={this.fetchImages} />}
+        
+
         {showModal &&
           (<Modal onClose={this.toggleModal}>
-          <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil voluptatem accusantium atque voluptates nisi deleniti dignissimos dolore, expedita tempora molestias molestiae eum necessitatibus, quo incidunt? Labore voluptates explicabo debitis ratione.
-          Animi voluptatum, impedit officiis consectetur libero rerum tempora! 
-          </p>
+            src={modalUrl} alt={modalAlt}
           <button type="button" onClick={this.toggleModal}>
             Close
           </button>
         </Modal>)}
-    </div>
-  );
+        </>
+  )
   }
-}
+};
 
 export default App;
