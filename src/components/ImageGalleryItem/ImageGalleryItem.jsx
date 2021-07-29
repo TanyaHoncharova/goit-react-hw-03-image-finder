@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import style  from './ImageGalleryItem.module.css';
 
 const ImageGalleryItem = ({ alt, src, url, onClick }) => (
+  
   <li className={style.ImageGalleryItem}>
     <img
       onClick={onClick}

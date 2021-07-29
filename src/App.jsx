@@ -68,7 +68,10 @@ class App extends Component {
         }
       })
       .catch(error => this.setState({ error: error.message }))
-      .finally(() => this.setState({ isLoading: false }));
+      .finally(() => {
+        this.scrollWindow();
+        this.setState({ isLoading: false });
+      });
   };
 
   onClickImageGalleryItem = (e) => {
@@ -77,6 +80,13 @@ class App extends Component {
       modalAlt: e.currentTarget.getAttribute('alt'),
     });
     this.toggleModal();
+  };
+
+    scrollWindow = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   };
 
   render() {
