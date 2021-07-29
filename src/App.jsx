@@ -30,7 +30,10 @@ class App extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (prevState.searchQuery !== this.state.searchQuery) {
       this.fetchImages();
-  }
+    }
+    if (prevState.currentPage > 2) {
+      this.scrollWindow();
+    }
   }
   
   toggleModal = () => {
@@ -69,7 +72,7 @@ class App extends Component {
       })
       .catch(error => this.setState({ error: error.message }))
       .finally(() => {
-        this.scrollWindow();
+        
         this.setState({ isLoading: false });
       });
   };
