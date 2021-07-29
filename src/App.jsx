@@ -27,20 +27,6 @@ class App extends Component {
     modalAlt: '',
   }
 
-//   componentDidMount() {
-//     this.setState({ loading: true });
-    
-//     fetch('https://pixabay.com/api/?key=21857755-e4f1c8434e57799dc3fa1e51f&q=cat&image_type=photo&orientation=horizontal&page=1&per_page=12')
-//       .then(response => {
-//         if() {
-//          return response.json()
-//         }
-//       })
-//       .then(({ hits }) => hits)
-//       .then(hits => this.setState({ hits }))
-//       .finally(() => this.setState({ loading: false }));
-// }
-
   componentDidUpdate(prevProps, prevState) {
     if (prevState.searchQuery !== this.state.searchQuery) {
       this.fetchImages();
@@ -110,12 +96,12 @@ class App extends Component {
         {isLoading && <Loader name={searchQuery}/>}
         
          { shouldRenderLoadMoreButton && 
-          <Button onFetchImages={this.fetchImages} />}
+          <Button onClick={this.fetchImages} />}
         
 
         {showModal &&
-          (<Modal onClose={this.toggleModal}>
-            src={modalUrl} alt={modalAlt}
+          (<Modal onClose={this.toggleModal}
+            src={modalUrl} alt={modalAlt}>
           <button type="button" onClick={this.toggleModal}>
             Close
           </button>
