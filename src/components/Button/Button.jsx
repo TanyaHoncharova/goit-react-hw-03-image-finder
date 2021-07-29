@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 class Button extends Component {
-    componentDidMount() {
+    componentDidUpdate() {
         window.scrollTo({
           top: document.documentElement.scrollHeight,
           behavior: 'smooth',
